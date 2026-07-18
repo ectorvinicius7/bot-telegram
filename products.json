@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Café Premium",
+    "price": "R$ 24,90",
+    "description": "Café especial torrado, aroma intenso e sabor equilibrado.",
+    "link": "https://exemplo.com/cafe-premium"
+  },
+  {
+    "name": "Notebook Básico",
+    "price": "R$ 1.899,00",
+    "description": "Ideal para estudos e trabalho leve com boa performance.",
+    "link": "https://exemplo.com/notebook-basico"
+  },
+  {
+    "name": "Smartwatch Esportivo",
+    "price": "R$ 349,90",
+    "description": "Acompanhamento de atividades, notificações e monitoramento.",
+    "link": "https://exemplo.com/smartwatch"
+  },
+  {
+    "name": "Mochila Ergonomica",
+    "price": "R$ 129,90",
+    "description": "Conforto e organização para o dia a dia.",
+    "link": "https://exemplo.com/mochila"
+  }
+]
