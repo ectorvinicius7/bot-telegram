@@ -1,12 +1,15 @@
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from telegram import Update
 from telegram.ext import ContextTypes
 
 
 PRODUCTS_FILE = Path(__file__).resolve().parent.parent / "products.json"
+MAX_MESSAGE_LENGTH = 3500
 
 
 def load_products() -> list[dict[str, Any]]:
@@ -14,12 +17,45 @@ def load_products() -> list[dict[str, Any]]:
         return json.load(file)
 
 
+def _clean_url(url: str) -> str:
+    parsed = urlparse(url)
+    query_params = parse_qsl(parsed.query, keep_blank_values=True)
+    filtered_params = [
+        (key, value)
+        for key, value in query_params
+        if key.lower() not in {
+            "utm_source",
+            "utm_medium",
+            "utm_campaign",
+            "utm_term",
+            "utm_content",
+            "ref",
+            "tag",
+            "sp",
+            "source",
+            "sr",
+            "ascsubtag",
+            "ls",
+            "cmpid",
+            "smid",
+            "link_code",
+            "campaign",
+            "ad_id",
+            "gclid",
+            "fbclid",
+        }
+    ]
+    cleaned = parsed._replace(query=urlencode(filtered_params, doseq=True))
+    return urlunparse(cleaned)
+
+
 def format_product(product: dict[str, Any]) -> str:
+    clean_link = _clean_url(str(product.get("link", "")))
     return (
         f"📦 {product['name']}\n"
         f"💰 Preço: {product['price']}\n"
         f"📝 {product['description']}\n"
-        f"🔗 {product['link']}"
+        f"🔗 {clean_link}"
     )
 
 
@@ -30,7 +66,10 @@ async def products(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("Nenhum produto disponível no momento.")
         return
 
-    message = "🛍️ Produtos em destaque:\n\n"
-    message += "\n\n".join(format_product(product) for product in products)
+    await update.message.reply_text("🛍️ Produtos em destaque:")
 
-    await update.message.reply_text(message)
+    for index, product in enumerate(products, start=1):
+        formatted = format_product(product)
+        await update.message.reply_text(formatted)
+        if index < len(products):
+            await asyncio.sleep(5)
